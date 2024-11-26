@@ -1,25 +1,24 @@
 # IT Support & Knowledge Quiz Bot 🤖
 
-🚀 A versatile Discord bot for IT professionals and learners to test their knowledge, receive hints, and track their progress in real-time.
+🚀 A versatile Discord bot designed to help IT professionals and learners test their knowledge, receive helpful hints, and track their progress efficiently.
 
 ---
 
-## **Features**
-- 📚 **Interactive Quizzes**: Tackle questions across various IT domains with easy, medium, and hard difficulties.
-- 🕒 **Timed Questions**: Keep up with the pace through countdown timers.
-- 🏆 **Leaderboard**: Compete with others and see your performance instantly.
-- 💡 **Hints & Feedback**: Learn from mistakes with detailed explanations.
-- 🤓 **AI-Powered Assistance**: Chat with OpenAI for better insights on quiz topics.
-- 💾 **MongoDB Integration**: Dynamically fetch questions and update data.
-- 🎭 **Colorful Progress Bars**: See your quiz journey in style!
+## **Core Features**
+- 📚 **Interactive Quizzes**: Questions across IT domains with varying difficulty levels.
+- 🕒 **Timed Challenges**: Stay sharp with countdown timers.
+- 🏆 **Leaderboard**: Compete and see your ranking instantly.
+- 💡 **Hints & Explanations**: Learn from mistakes with clear feedback.
+- 🤓 **AI-Powered Insights**: Get assistance on quiz topics with integrated AI.
+- 💾 **MongoDB Integration**: Fetch and update questions seamlessly.
 
 ---
 
 ## **Tech Stack**
 - **Language**: Python
-- **Libraries**: `discord.py`, `asyncio`, `openai`, `pymongo`
+- **Key Libraries**: `discord.py`, `asyncio`, `pymongo`
 - **Database**: MongoDB Atlas
-- **Bot Hosting**: Cloud or local deployment
+- **Deployment**: Cloud or local hosting options
 
 ---
 
@@ -49,48 +48,42 @@
     ```
 ---
 
-## **Getting Started**
-Follow these steps to see the bot in action:
+## **Quick Start Guide**
 
-### 1. **Getting The Quiz Started**
-   ![Getting The Quiz Started](https://i.imgur.com/29Wam5g.png)
+### 1. **Starting the Quiz**
+   ![Getting The Quiz Started](https://i.imgur.com/LOR6eKK.png)
 
-   Message the Bot: Use the command `!q` to start QuizBully!
+   Use the command `!q` to initiate a quiz.
 
-### 2. **Starting a Quiz**
+### 2. **Choosing Difficulty**
    ![Starting a Quiz](https://i.imgur.com/zq3PmV3.png)
 
-   View: React with 💚, 💛, or 💜 to choose difficulty.
+   React with 💚, 💛, or 💜 to choose the quiz difficulty level.
 
-### 3. **Selecting Quiz Type**
+### 3. **Select Quiz Type**
    ![Selecting Quiz Type](https://i.imgur.com/K7U1VCt.png)
 
-   View: Choose from the following: 1️⃣ Generate a new Quiz, 2️⃣ Select from existing topics, Go back, Cancel the quiz.
+   Choose an option: 1️⃣ Generate new questions, 2️⃣ Pick existing topics, or cancel.
 
-### 4. **Generating New Questions**
-   ![Generating New Questions](https://i.imgur.com/9h5vpTA.png)
+### 4. **Generate Quizzes**
+   ![Generating New Quizzes](https://i.imgur.com/9h5vpTA.png)
 
-   Example: Enter "CompTIA Network+" to generate questions on the topic.
+   Example: Enter "CompTIA Network+" to receive questions on that topic.
 
-### 5. **Quiz Question Embed**
+### 5. **Question Embed**
    ![Quiz Question Embed](https://i.imgur.com/N4lR9Yy.png)
 
-   View: Question embed with color-coded difficulty that varies the speed of the question timer.
-
----
-
-## **Future Enhancements**
-- 🌐 Multi-language Support
-- 💬 Enhanced AI Conversation Context
+   View: Questions with color-coded difficulty timers.
 
 ---
 
 ## **Contributing**
+We welcome contributions! Here’s how to get started:
 1. Fork the repository.
-2. Create a feature branch (`git checkout -b feature-name`).
+2. Create a branch (`git checkout -b feature-name`).
 3. Commit your changes (`git commit -m 'Add feature'`).
-4. Push the branch (`git push origin feature-name`).
-5. Create a pull request.
+4. Push to your branch (`git push origin feature-name`).
+5. Submit a pull request.
 
 ---
 
@@ -101,5 +94,5 @@ This project is licensed under the [MIT License](LICENSE).
 
 ## **Contact**
 For questions or contributions:
-- **Developer**: [Your Name](https://github.com/your-username)
-- **Email**: your.email@example.com
+- **GitHub**: [Kyle A Dean](https://github.com/cloudURBANE)
+- **LinkedIn**: [My LinkedIn Profile](https://www.linkedin.com/in/kyleaustin-dean/)
