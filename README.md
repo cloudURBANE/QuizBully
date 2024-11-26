@@ -60,7 +60,7 @@
 Follow these steps to see the bot in action. Capture screenshots at the suggested points!
 
 ### 1. **Bot Online**
-   - 🖼️ **Screenshot**: Take a screenshot of the bot logging in or its online status in Discord.
+   - 🖼️ **[Screenshot](https://imgur.com/a/29Wam5g)**
    - Example Message: `Bot connected as QuizMasterBot!`
 
 ### 2. **Starting a Quiz**
