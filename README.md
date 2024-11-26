@@ -68,12 +68,12 @@
 ### 4. **Generate Quizzes**
    ![Generating New Quizzes](https://i.imgur.com/9h5vpTA.png)
 
-   Example: Enter "CompTIA Network+" to receive questions on that topic.
+   Example: Enter your topic of choice to start generating questions using OPENAI's ChatGPT "4o" Model.
 
 ### 5. **Question Embed**
    ![Quiz Question Embed](https://i.imgur.com/N4lR9Yy.png)
 
-   View: Questions with color-coded difficulty timers.
+   View: Question & answer choices and emoji reactions as your way of answer input with color-coded difficulty timers.
 
 ---
 
