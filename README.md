@@ -58,7 +58,7 @@ Follow these steps to see the bot in action. Add screenshots as described below:
    Message the Bot: Use the command "!q" to start QuizBully!
 
 ### 2. **Starting a Quiz**
-   ![Starting a Quiz](https://imgur.com/zq3PmV3)
+   ![Starting a Quiz][#](https://imgur.com/zq3PmV3)
 
    View: React with 💚, 💛, or ❤️ to choose difficulty.
 
