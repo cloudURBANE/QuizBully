@@ -9,9 +9,9 @@
 - 🕒 **Timed Questions**: Keep up with the pace through countdown timers.
 - 🏆 **Leaderboard**: Compete with others and see your performance instantly.
 - 💡 **Hints & Feedback**: Learn from mistakes with detailed explanations.
-- 🧠 **AI-Powered Assistance**: Chat with OpenAI for better insights on quiz topics.
+- 🤓 **AI-Powered Assistance**: Chat with OpenAI for better insights on quiz topics.
 - 💾 **MongoDB Integration**: Dynamically fetch questions and update data.
-- 🎨 **Colorful Progress Bars**: See your quiz journey in style!
+- 🎭 **Colorful Progress Bars**: See your quiz journey in style!
 
 ---
 
@@ -50,33 +50,32 @@
 ---
 
 ## **Getting Started**
-Follow these steps to see the bot in action. Add screenshots as described below:
+Follow these steps to see the bot in action:
 
 ### 1. **Getting The Quiz Started**
-   ![Getting The Quiz Started](https://imgur.com/a/29Wam5g)
+   ![Getting The Quiz Started](https://i.imgur.com/29Wam5g.png)
 
-   Message the Bot: Use the command "!q" to start QuizBully!
+   Message the Bot: Use the command `!q` to start QuizBully!
 
 ### 2. **Starting a Quiz**
-   ![Starting a Quiz][#](https://imgur.com/zq3PmV3)
+   ![Starting a Quiz](https://i.imgur.com/zq3PmV3.png)
 
-   View: React with 💚, 💛, or ❤️ to choose difficulty.
+   View: React with 💚, 💛, or 💜 to choose difficulty.
 
 ### 3. **Selecting Quiz Type**
-   ![Selecting Quiz Type](https://imgur.com/K7U1VCt) 
+   ![Selecting Quiz Type](https://i.imgur.com/K7U1VCt.png)
 
-   View: Choose from the following: 1️⃣ Generate a new Quiz, 2️⃣ Select from exsisting topics, Go back, Cancel the quiz
+   View: Choose from the following: 1️⃣ Generate a new Quiz, 2️⃣ Select from existing topics, Go back, Cancel the quiz.
 
-### 4. **Generating new questions**
-   ![Generating new questions](https://imgur.com/9h5vpTA) 
+### 4. **Generating New Questions**
+   ![Generating New Questions](https://i.imgur.com/9h5vpTA.png)
 
    Example: Enter "CompTIA Network+" to generate questions on the topic.
 
 ### 5. **Quiz Question Embed**
-   ![Quiz Question Embed](https://imgur.com/N4lR9Yy)
+   ![Quiz Question Embed](https://i.imgur.com/N4lR9Yy.png)
 
    View: Question embed with color-coded difficulty that varies the speed of the question timer.
-
 
 ---
 
