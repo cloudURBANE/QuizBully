@@ -47,56 +47,42 @@
     ```bash
     python bot.py
     ```
-
-5. **Invite the Bot**:
-    - Generate an invite link for your bot:
-      ```
-      https://discord.com/oauth2/authorize?client_id=your_bot_id&scope=bot&permissions=8
-      ```
-
 ---
 
-## **Demonstration**
-Follow these steps to see the bot in action. Capture screenshots at the suggested points!
+## **Getting Started**
+Follow these steps to see the bot in action. Add screenshots as described below:
 
-### 1. **Bot Online**
-   - 🖼️ **[Screenshot](https://imgur.com/a/29Wam5g)**
-   - Example Message: `Bot connected as QuizMasterBot!`
+### 1. **Getting The Quiz Started**
+   ![Getting The Quiz Started](https://imgur.com/a/29Wam5g)
+
+   Message the Bot: Use the command "!q" to start QuizBully!
 
 ### 2. **Starting a Quiz**
-   - 🖼️ **Screenshot**: Show the bot asking for difficulty levels (easy, medium, hard).
-   - Example Message: `React with 💚, 💛, or ❤️ to choose difficulty.`
+   ![Starting a Quiz](https://imgur.com/zq3PmV3)
 
-### 3. **Selecting Topics**
-   - 🖼️ **Screenshot**: Display the topic selection interface or paginated options.
-   - Example View: `1️⃣ Windows, 2️⃣ Networking, 3️⃣ Security.`
+   View: React with 💚, 💛, or ❤️ to choose difficulty.
 
-### 4. **Quiz Question Embed**
-   - 🖼️ **Screenshot**: Highlight the embed for a quiz question with reaction options (🇦, 🇧, 🇨, 🇩).
-   - Example: Question embed with color-coded difficulty.
+### 3. **Selecting Quiz Type**
+   ![Selecting Quiz Type](https://imgur.com/K7U1VCt) 
 
-### 5. **Hint and Feedback**
-   - 🖼️ **Screenshot**: Capture the bot providing hints or feedback after a wrong answer.
-   - Example Message: `❌ Incorrect! The correct answer was X. Hint: Here's why...`
+   View: Choose from the following: 1️⃣ Generate a new Quiz, 2️⃣ Select from exsisting topics, Go back, Cancel the quiz
 
-### 6. **Progress Bar**
-   - 🖼️ **Screenshot**: Show the progress bar for the current quiz.
-   - Example: `[#####.....] 50% Completed`
+### 4. **Generating new questions**
+   ![Generating new questions](https://imgur.com/9h5vpTA) 
 
-### 7. **Leaderboard**
-   - 🖼️ **Screenshot**: Display the real-time leaderboard after quiz completion.
-   - Example: `🏆 Leaderboard - Top Scorers`
+   Example: Enter "CompTIA Network+" to generate questions on the topic.
 
-### 8. **AI Chat Assistance**
-   - 🖼️ **Screenshot**: Show the bot answering a user’s query about a question through OpenAI-powered chat.
-   - Example: `Why is the answer X? Here's an explanation...`
+### 5. **Quiz Question Embed**
+   ![Quiz Question Embed](https://imgur.com/N4lR9Yy)
+
+   View: Question embed with color-coded difficulty that varies the speed of the question timer.
+
 
 ---
 
 ## **Future Enhancements**
 - 🌐 Multi-language Support
 - 💬 Enhanced AI Conversation Context
-- 🔒 Role-based Quiz Access
 
 ---
 
