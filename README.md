@@ -63,7 +63,7 @@
 ### 3. **Select Quiz Type**
    ![Selecting Quiz Type](https://i.imgur.com/K7U1VCt.png)
 
-   Choose an option: 1️⃣ Generate new questions, 2️⃣ Pick existing topics, or cancel.
+   Choose an option: 1️ Generate new questions, 2️ Pick existing topics, 3 cancel, or 4 Go back.
 
 ### 4. **Generate Quizzes**
    ![Generating New Quizzes](https://i.imgur.com/9h5vpTA.png)
