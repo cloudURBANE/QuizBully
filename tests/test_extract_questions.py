@@ -29,3 +29,9 @@ def test_extract_questions_extra_whitespace():
     questions = extract_questions_from_response(response)
     assert len(questions) == 1
     assert questions[0]['options'][0] == '10'
+
+
+def test_extract_questions_empty_string():
+    response = ""
+    questions = extract_questions_from_response(response)
+    assert questions == []

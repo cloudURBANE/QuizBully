@@ -83,7 +83,7 @@ class QuizState:
         self.user_answer_events = {} 
         self.user_scores = {}
         self.user_difficulty = {}
-        # Dictionary to store current question data for each user question
+        # Dictionary to store current question data for each user
         self.current_question = {}
         self.user_streaks = {}  #
         self.current_question_index = {}  # New property
@@ -628,24 +628,30 @@ class QuizState:
     async def send_error_embed(self, ctx, error):
         """Send an error message embed to the invoking user."""
         user = ctx.author
+        embed = discord.Embed(
+            title="Error",
+            description=str(error),
+            color=discord.Color.red(),
+        )
         try:
             dm_channel = await get_dm_channel_for_user(user)
             logging.info(
                 f"Fetched or created DM channel with ID {dm_channel.id} for user ID {user.id}"
             )
-
-            embed = discord.Embed(
-                title="Error",
-                description=str(error),
-                color=discord.Color.red(),
-            )
             await dm_channel.send(embed=embed)
             return
-        except Exception as e:
+        except Exception as dm_error:
             logging.error(
-                f"Failed to send error embed to user {user.id}: {e}",
+                f"Failed to send error embed to user {user.id}: {dm_error}",
                 exc_info=True,
             )
+            try:
+                await ctx.send(embed=embed)
+            except Exception as public_error:
+                logging.error(
+                    f"Failed to send fallback error message to context: {public_error}",
+                    exc_info=True,
+                )
 
 
 
