@@ -88,7 +88,7 @@ We welcome contributions! Here’s how to get started:
 ---
 
 ## **License**
-This project is licensed under the [MIT License](LICENSE).
+The licensing for this project has not been specified. Please contact the author if you plan to use this code in your own projects.
 
 ---
 
