@@ -58,7 +58,7 @@
 ### 2. **Choosing Difficulty**
    ![Starting a Quiz](https://i.imgur.com/zq3PmV3.png)
 
-   React with 💚, 💛, or 💜 to choose the quiz difficulty level.
+   React with 💚, 💛, or ❤️ to choose the quiz difficulty level.
 
 ### 3. **Select Quiz Type**
    ![Selecting Quiz Type](https://i.imgur.com/K7U1VCt.png)
@@ -68,7 +68,7 @@
 ### 4. **Generate Quizzes**
    ![Generating New Quizzes](https://i.imgur.com/9h5vpTA.png)
 
-   Example: Enter your topic of choice to start generating questions using OPENAI's ChatGPT "4o" Model.
+   Example: Enter your topic of choice to start generating questions using OpenAI's ChatGPT "4o" model.
 
 ### 5. **Question Embed**
    ![Quiz Question Embed](https://i.imgur.com/N4lR9Yy.png)
@@ -88,7 +88,7 @@ We welcome contributions! Here’s how to get started:
 ---
 
 ## **License**
-This project is licensed under the [MIT License](LICENSE).
+The licensing for this project has not been specified. Please contact the author if you plan to use this code in your own projects.
 
 ---
 
