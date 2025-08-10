@@ -7,6 +7,7 @@ import asyncio
 import logging
 import random
 import inspect
+import math
 from typing import Callable, Dict, List, Tuple, Union
 from collections import defaultdict
 from datetime import datetime, timedelta
@@ -18,6 +19,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Scalability/performance configuration
+MAX_CONCURRENT_AI = int(os.getenv("MAX_CONCURRENT_AI", "3"))
+TIMER_UPDATE_INTERVAL = float(os.getenv("TIMER_UPDATE_INTERVAL", "2"))  # seconds between timer updates
+ANIMATIONS_ENABLED = os.getenv("ANIMATIONS_ENABLED", "true").lower() == "true"
+
 # MongoDB connection setup
 MONGO_URI = os.getenv("MONGO_URI")
 questions_collection = None
@@ -28,12 +34,17 @@ if MONGO_URI:
         collection_name = "QuizBully_2023"
         db = client2[database_name]
         questions_collection = db[collection_name]
+        try:
+            questions_collection.create_index([("topic", 1), ("difficulty", 1)])
+        except Exception as idx_err:
+            logging.warning(f"Failed to ensure Mongo index: {idx_err}")
     except Exception as e:
         logging.warning(f"MongoDB not configured or unreachable: {e}")
 
 # OpenAI API setup
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 openai_client = AsyncOpenAI(api_key=OPENAI_API_KEY) if OPENAI_API_KEY else None
+ai_semaphore = asyncio.Semaphore(MAX_CONCURRENT_AI)
 
 # Discord bot token
 TOKEN = os.getenv("DISCORD_TOKEN")
@@ -45,6 +56,13 @@ quiz_data = {
     "medium": [],
     "hard": []
 }
+
+# In-memory cache for generated questions to avoid repeated API calls in a session
+# Key: (topic_name_lower, difficulty_level) -> List[Dict]
+generated_cache: Dict[Tuple[str, str], List[Dict]] = {}
+
+# Precompiled regex for extraction performance
+EXTRACT_PATTERN = re.compile(r"'question':\s*'([^']+)',\s*'options':\s*\[([^\]]+)\],\s*'answer':\s*(\d+),\s*'hint':\s*'([^']+)'")
 
 # Logging setup
 logging.basicConfig(level=logging.INFO)
@@ -481,7 +499,8 @@ class QuizState:
         await self.stop_timer(user_id)
         await self.handle_user_scores(user_id)
         try:
-            await self.random_animation(user)
+            if ANIMATIONS_ENABLED:
+                await self.random_animation(user)
             await self.proceed_to_next_question(user, user_id)
         except Exception as e:
             logging.error(f"An error occurred in handle_correct_answer: {e}", exc_info=True)
@@ -569,10 +588,11 @@ class QuizState:
             if not openai_client:
                 return "AI is not configured. Please set OPENAI_API_KEY."
             messages = [{"role": "user", "content": prompt}]
-            response = await openai_client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=messages
-            )
+            async with ai_semaphore:
+                response = await openai_client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=messages
+                )
             return response.choices[0].message.content or ""
         except Exception as e:
             logging.error(f"OpenAI API error: {e}")
@@ -932,15 +952,18 @@ async def timer_coroutine(user: discord.User, user_id, message, q_index, timer_m
     selected_language = random.choice(green_languages)
     structured_text = f"```{selected_language}\nTime's up for this question! The correct answer was: {correct_answer_text}\n```"
     logging.info(f"[{current_time}] Starting countdown for user_id {user_id}...")
-    for remaining in range(DIFFICULTY_TIMES[difficulty], 0, -1):
-        percent = (remaining / DIFFICULTY_TIMES[difficulty]) * 100
+    total = DIFFICULTY_TIMES[difficulty]
+    steps = max(1, math.ceil(total / TIMER_UPDATE_INTERVAL))
+    for step in range(steps, 0, -1):
+        remaining = int(step * TIMER_UPDATE_INTERVAL)
+        percent = (remaining / total) * 100
         progress_embed = quiz_state.progress_bar(percent)
         if timer_message:
             await update_timer_message(user, dm_channel, timer_msg_id, progress_embed)
         else:
             timer_message = await user.send(content=f"Question {q_index + 1}: {remaining} seconds remaining", embed=progress_embed)
             timer_msg_id = timer_message.id
-        await asyncio.sleep(1)
+        await asyncio.sleep(TIMER_UPDATE_INTERVAL)
     logging.info(f"[{current_time}] Timer completed for user_id {user_id}. Cleaning up...")
     if quiz_state.progress_messages.get(user_id):
         old_msg = await dm_channel.fetch_message(quiz_state.progress_messages[user_id])
@@ -1125,7 +1148,7 @@ if __name__ == "__main__":
 
 def extract_questions_from_response(response: str) -> List[Dict]:
     pattern = r"'question':\s*'([^']+)',\s*'options':\s*\[([^\]]+)\],\s*'answer':\s*(\d+),\s*'hint':\s*'([^']+)'"
-    matches = re.findall(pattern, response)
+    matches = EXTRACT_PATTERN.findall(response)
     if not matches:
         print("No matches found. Response content:", response)
         return []
@@ -1171,10 +1194,11 @@ def retry_with_exponential_backoff(
 async def make_completion_request_with_retry(**keyword_arguments):
     if not openai_client:
         raise RuntimeError("OPENAI_API_KEY not configured")
-    completion_response = await openai_client.chat.completions.create(
-        model=keyword_arguments['model'],
-        messages=keyword_arguments['messages']
-    )
+    async with ai_semaphore:
+        completion_response = await openai_client.chat.completions.create(
+            model=keyword_arguments['model'],
+            messages=keyword_arguments['messages']
+        )
     return completion_response
 
 async def generate_question_set(topic_name: str, difficulty_level: str):
@@ -1192,11 +1216,16 @@ async def generate_question_set(topic_name: str, difficulty_level: str):
         end_time = datetime.utcnow()
         response_time_seconds = (end_time - start_time).seconds
         response_content = completion_response.choices[0].message.content
-        extracted_questions = extract_questions_from_response(response_content)
-        if not extracted_questions:
-            raise ValueError("No questions were extracted from the response.")
+        cache_key = (topic_name.lower(), difficulty_level)
+        if cache_key in generated_cache:
+            extracted_questions = generated_cache[cache_key]
+        else:
+            extracted_questions = extract_questions_from_response(response_content)
+            if not extracted_questions:
+                raise ValueError("No questions were extracted from the response.")
+            generated_cache[cache_key] = extracted_questions
         for question_entry in extracted_questions:
-            print("Saving question:", question_entry)
+            pass  # optionally persist
         quiz_data[difficulty_level] = extracted_questions
         print(f"API responded in {response_time_seconds} seconds.")
     except Exception as exception_instance:

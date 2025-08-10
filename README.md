@@ -16,6 +16,11 @@ A Discord bot for interactive IT quizzes, with timers, leaderboards, hints, and 
 - Hints and AI-powered explanations (OpenAI)
 - Optional MongoDB topics source; works without DB
 
+## Scaling and performance
+- `MAX_CONCURRENT_AI` (default 3): limits concurrent OpenAI calls
+- `TIMER_UPDATE_INTERVAL` (default 2.0): reduce DM timer update frequency
+- `ANIMATIONS_ENABLED` (default true): toggle animations for low-noise runs
+
 ## Getting Started
 
 ### 1) Clone
@@ -30,6 +35,10 @@ Copy `.env.example` to `.env` and fill values:
 DISCORD_TOKEN=your_discord_bot_token
 OPENAI_API_KEY=your_openai_api_key
 MONGO_URI=your_mongodb_connection_uri # optional
+# Scaling
+MAX_CONCURRENT_AI=3
+TIMER_UPDATE_INTERVAL=2
+ANIMATIONS_ENABLED=true
 ```
 
 ### 3) Install
@@ -49,6 +58,9 @@ docker run --rm \
   -e DISCORD_TOKEN=$DISCORD_TOKEN \
   -e OPENAI_API_KEY=$OPENAI_API_KEY \
   -e MONGO_URI=$MONGO_URI \
+  -e MAX_CONCURRENT_AI=3 \
+  -e TIMER_UPDATE_INTERVAL=2 \
+  -e ANIMATIONS_ENABLED=true \
   quiz-bot:latest
 ```
 
