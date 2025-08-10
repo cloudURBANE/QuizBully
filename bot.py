@@ -14,23 +14,29 @@ from openai import OpenAI, AsyncOpenAI
 import re
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # MongoDB connection setup
-uri = ""
-client2 = MongoClient(uri, server_api=ServerApi('1'))
-database_name = "Quiz_Set_Data_Collections_2023"
-collection_name = "QuizBully_2023"
-db = client2[database_name]
-questions_collection = db[collection_name]
+MONGO_URI = os.getenv("MONGO_URI")
+questions_collection = None
+if MONGO_URI:
+    try:
+        client2 = MongoClient(MONGO_URI, server_api=ServerApi('1'))
+        database_name = "Quiz_Set_Data_Collections_2023"
+        collection_name = "QuizBully_2023"
+        db = client2[database_name]
+        questions_collection = db[collection_name]
+    except Exception as e:
+        logging.warning(f"MongoDB not configured or unreachable: {e}")
 
 # OpenAI API setup
-client = AsyncOpenAI(api_key=os.environ.get('OPENAI_API_KEY', ''))
-
-OPENAI_API_KEY = ""
-OpenAI.api_key = OPENAI_API_KEY
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+openai_client = AsyncOpenAI(api_key=OPENAI_API_KEY) if OPENAI_API_KEY else None
 
 # Discord bot token
-TOKEN = ''
+TOKEN = os.getenv("DISCORD_TOKEN")
 
 # Global variables
 topic = ""
@@ -406,17 +412,17 @@ class QuizState:
     "```json\n{ \"response\": \"❌ You'll get it next time!\" }\n```",
     "```ml\n(* ❌ Don't let that stop you. *)\n```",
     "```nim\n# ❌ Keep trying, you'll get it!\n```",
-    "```perl\n# ❌ Don’t sweat it, practice makes perfect!\n```",
+    "```perl\n# ❌ Don't sweat it, practice makes perfect!\n```",
     "```python\n# ❌ Remember, wrong answers are stepping stones to the right answer.\n```",
     "```r\n# ❌ Oops, that one slipped away.\n```",
     "```ruby\n# ❌ Oh dear, that's not right.\n```",
-    "```scala\n// ❌ Don’t let this bump in the road stop you.\n```",
+    "```scala\n// ❌ Don't let this bump in the road stop you.\n```",
     "```sql\n-- ❌ Oh, tough luck.\n```",
     "```swift\n// ❌ That was a tricky one.\n```",
-    "```tex\n% ❌ Ah, don’t let it get to you!\n```",
+    "```tex\n% ❌ Ah, don't let it get to you!\n```",
     "```vim\n\" ❌ Missed it by a hair.\n```",
     "```yaml\n- ❌ So close, yet so far.\n```",
-    "```markdown\n* ❌ Keep your chin up, you’ll get the next one! *\n```",
+    "```markdown\n* ❌ Keep your chin up, you'll get the next one! *\n```",
     "```elixir\n# ❌ A minor setback for a major comeback!\n```",
     "```css\n/* ❌ A stumble may prevent a fall! */\n```",
     "```bash\n# ❌ Every mistake is a learning experience.\n```",
@@ -424,7 +430,7 @@ class QuizState:
     "```php\n/* ❌ The secret of getting ahead is getting started. */\n```",
     "```asciidoc\n= 🎭 Ah, a plot twist! =\n```",
     "```c\n/* 🙈 That answer was in disguise! */\n```",
-    "```clojure\n;; 💼 It’s not in the bag yet!\n```",
+    "```clojure\n;; 💼 It's not in the bag yet!\n```",
     "```coffeescript\n# 👓 Needs a closer look!\n```",
     "```dart\n// 🎩 Not the magic word!\n```",
     "```dockerfile\n# 🐾 A little off the trail!\n```",
@@ -435,11 +441,11 @@ class QuizState:
     "```html\n<!-- 🤔 That answer has wandered off! -->\n```",
     "```ini\n[🧩 Not the right fit, but keep piecing it together!]\n```",
     "```java\n// 🔍 A little more sleuthing required!\n```",
-    "```javascript\n/* 🎈 Don’t let that answer deflate you! */\n```",
+    "```javascript\n/* 🎈 Don't let that answer deflate you! */\n```",
     "```jsonc\n/* 🌪 Not the eye of the storm! */\n```",
     "```kotlin\n// 🚦 Wait for the green light!\n```",
     "```lua\n-- 🛤 Took a slight detour!\n```",
-    "```markdown\n* 🕵️ Let’s investigate that again! *\n```",
+    "```markdown\n* 🕵️ Let's investigate that again! *\n```",
     "```nginx\n# 💡 A little more illumination needed!\n```",
     # ... And more
 ]
@@ -514,7 +520,8 @@ class QuizState:
         last_question_msg_id = self.current_question_message.get(user_id)
         if last_question_msg_id:
             try:
-                await dm_channel.delete_message(last_question_msg_id)  # Directly deleting the message using its ID
+                last_message = await dm_channel.fetch_message(last_question_msg_id)
+                await last_message.delete()
             except discord.errors.NotFound:
                 logging.warning(f"Last question message for user_id {user_id} already deleted or not found.")
             except Exception as e:
@@ -705,7 +712,9 @@ class QuizState:
         await self.stop_timer(user_id)
         await self.handle_user_scores(user_id, reset_streak=True)
         try:
-            await self.send_feedback(user, correct_answer, hint)
+            question_data = self.current_question.get(user_id, {}).get("questions")
+            question_text = question_data.get("question") if isinstance(question_data, dict) else ""
+            await self.send_feedback(user, question_text, correct_answer, hint)
             await self.proceed_to_next_question(user, user_id)
         except Exception as e:
             logging.error(f"An error occurred in handle_wrong_answer: {e}", exc_info=True)
@@ -748,12 +757,13 @@ class QuizState:
 
 
 
-    async def proceed_to_next_question(self, user, user_id, q_index):
-        user_id = user.id  # Assuming 'user' is a Discord User object
+    async def proceed_to_next_question(self, user, user_id, q_index=None):
         user = await bot.fetch_user(user_id)
         dm_channel = await get_dm_channel_for_user(user)
         logging.info(f"Fetched or created DM channel with ID {dm_channel.id} for user ID {user.id}")
  
+        if q_index is None:
+            q_index = self.current_question_index.get(user_id, -1)
         logging.info(f'Proceeding to next question: user_id={user_id}, q_index={q_index}')
 
         # Ensure difficulty is set correctly
@@ -778,9 +788,8 @@ class QuizState:
 
         # Send the next question
         await asyncio.sleep(0.3)  # A short delay
-        await self.send_question(dm_channel, user_id, next_q_index)  # Added self
+        await self.send_question(dm_channel, user_id, next_q_index)
 
-    
         logging.info(f'Successfully proceeded to next question or ended quiz for user_id={user_id}')
 
     # Updated send_feedback method to accept three arguments
@@ -822,48 +831,29 @@ class QuizState:
                 await user.send("Quiz paused. Click ▶️ to resume.")
             elif str(reaction.emoji) == "▶️":
                 # Resume the quiz
-                await self.proceed_to_next_question(user)
+                await self.proceed_to_next_question(user, user.id)
 
         except asyncio.TimeoutError:
             pass  # Handle the timeout if needed
 
 
-    async def call_gpt3(self, prompt, conversation_token=None):
+    async def call_gpt3(self, prompt, conversation_token=None) -> str:
         """
-        Calls the OpenAI GPT-3 engine with the provided prompt and optional conversation context.
-
-        Args:
-            prompt (str): The prompt to send to GPT-3.
-            conversation_token (str, optional): A token representing the ongoing conversation context.
-
-        Returns:
-            dict: The response from GPT-3.
+        Calls the OpenAI Chat Completions API and returns the assistant text.
         """
         try:
-            # Ensure the API key is set
-            if not OpenAI.api_key:
-                OpenAI.api_key = os.getenv("OPENAI_API_KEY")
+            if not openai_client:
+                return "AI is not configured. Please set OPENAI_API_KEY."
 
-                if not OpenAI.api_key:
-                    raise ValueError("Error: Missing OPENAI_API_KEY environment variable")
-
-            # Construct the request data
-            data = {"model": "gpt-3.5-turbo", "messages": [{"role": "user", "content": prompt}]}
-            
-            if conversation_token:
-                data["conversation_token"] = conversation_token
-
-            response = OpenAI.ChatCompletion.create(**data)
-
-            return response
-
-        except OpenAI.error.OpenAIError as e:
-            logging.error(f"OpenAI API error: {e}")
-            return {"choices": [{"text": "Sorry, I encountered an error while processing your request. Please try again."}]}
-
+            messages = [{"role": "user", "content": prompt}]
+            response = await openai_client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=messages
+            )
+            return response.choices[0].message.content or ""
         except Exception as e:
-            logging.error(f"An unexpected error occurred: {e}")
-            return {"choices": [{"text": "Sorry, an unexpected error occurred. Please try again."}]}
+            logging.error(f"OpenAI API error: {e}")
+            return "Sorry, I encountered an error while processing your request. Please try again."
 
     async def start_ai_conversation(self, user, question, correct_answer):
         """
@@ -877,9 +867,9 @@ class QuizState:
         try:
             # Construct the initial prompt for clarity
             initial_prompt = f"I had trouble understanding why the correct answer to '{question}' is '{correct_answer}'. Can you explain it to me?"
-            response = await self.call_gpt3(initial_prompt)
+            response_text = await self.call_gpt3(initial_prompt)
 
-            ai_msg = await user.send(response["choices"][0]["text"])
+            ai_msg = await user.send(response_text)
             guidance_msg = await user.send("You're now chatting with the AI. Type your questions or thoughts. Click ▶️ when you're ready to continue the quiz.")
             self.start_chat_with_ai(user.id)
 
@@ -895,8 +885,8 @@ class QuizState:
                 if 'conversation_token' in response:  # If your model supports conversation tokens
                     conversation_token = response['conversation_token']
 
-                response = await self.call_gpt3(user_msg.content, conversation_token)
-                ai_reply = await user.send(response["choices"][0]["text"])
+                response_text = await self.call_gpt3(user_msg.content, conversation_token)
+                ai_reply = await user.send(response_text)
                 ai_conversation_history.append(ai_reply)
 
             # Add the resume reaction
@@ -1135,10 +1125,13 @@ async def initiate_quiz(ctx, difficulty):
         quiz_state.total_time_taken.setdefault(user_id, 0)
         quiz_state.user_scores.setdefault(user_id, 0)
         
-        # Fetching from MongoDB
-        fetched_questions = list(questions_collection.find({"topic": topic, "difficulty": difficulty}))
-        if fetched_questions:
-            available_questions = fetched_questions
+        # Fetching from MongoDB if available
+        if questions_collection:
+            fetched_questions = list(questions_collection.find({"topic": topic, "difficulty": difficulty}))
+            if fetched_questions:
+                available_questions = fetched_questions
+            else:
+                available_questions = quiz_data.get(difficulty, [])
         else:
             available_questions = quiz_data.get(difficulty, [])
 
@@ -1227,13 +1220,16 @@ async def timer_coroutine(user: discord.User, user_id, message, q_index, timer_m
     current_time = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     logging.info(f"[{current_time}] Starting timer_coroutine for user_id {user_id}...")
 
-    # user and user_id are passed as arguments, no need to re-assign them from ctx
     dm_channel = await get_dm_channel_for_user(user)
     logging.info(f"Fetched or created DM channel with ID {dm_channel.id} for user ID {user.id}")
 
     timer_message = None if not timer_msg_id else await dm_channel.fetch_message(timer_msg_id)
     difficulty = quiz_state.user_difficulty.get(user_id)
-    question_data = quiz_data[difficulty][q_index]
+    questions_list = quiz_data.get(difficulty, [])
+    if not (0 <= q_index < len(questions_list)):
+        logging.warning(f"Invalid q_index {q_index} for difficulty {difficulty}")
+        return
+    question_data = questions_list[q_index]
     green_languages = ['diff', 'bash', 'ini', 'css', 'yaml', 'perl', 'python', 'makefile', 'tex']
     correct_answer_text = question_data['options'][question_data['answer']]
     selected_language = random.choice(green_languages)
@@ -1376,6 +1372,9 @@ NUMBER_EMOJIS = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣
 
 async def paginated_topics(ctx, difficulty):
     PAGE_SIZE = 10
+    if not questions_collection:
+        await ctx.send("Database not configured. Provide MONGO_URI to use existing topics.")
+        return None
     available_topics = questions_collection.distinct("topic", {"difficulty": difficulty})
 
     if not available_topics:
@@ -1508,7 +1507,10 @@ async def stop(ctx):
 @bot.command(name='q', help='Starts the quiz.')
 async def start_quiz(ctx):
     if not isinstance(ctx.channel, discord.DMChannel):
-        await ctx.send("Please send me a direct message to start the quiz.")
+        try:
+            await ctx.author.send("Please DM me and then run !q to start the quiz.")
+        except Exception:
+            await ctx.send("Please send me a direct message to start the quiz.")
         return
 
     user_id = ctx.author.id
@@ -1595,25 +1597,15 @@ async def start_quiz(ctx):
     await initiate_quiz(ctx, difficulty)
 
 
-async def main():
-    try:
-        # Send a message to the API immediately
-        response = await client.chat.completions.create(
-            model="gpt-4o-mini",  # Replace with your preferred model
-            messages=[{"role": "user", "content": "Respond with 'Online' if the API is working."}]
-        )
-        # Print the API response
-        print("API Response:", response.choices[0].message.content.strip())
-    except Exception as e:
-        print("Error connecting to the API:", e)
-
-# Automatically execute the function when the script is run
+# Entrypoint
 if __name__ == "__main__":
-    asyncio.run(main())
+    if not TOKEN:
+        print("DISCORD_TOKEN is not set. Set it in environment to run the bot.")
+    else:
+        bot.run(TOKEN)
 
 
-# Instantiate the async OpenAI client
-client = AsyncOpenAI(api_key=os.environ['OPENAI_API_KEY'])
+# Async OpenAI client is initialized above as openai_client
 
 # Function to extract questions from the response
 def extract_questions_from_response(response: str) -> List[Dict]:
@@ -1680,7 +1672,9 @@ async def make_completion_request_with_retry(**keyword_arguments):
     """
     Makes a completion request using retry logic with exponential backoff.
     """
-    completion_response = await client.chat.completions.create(
+    if not openai_client:
+        raise RuntimeError("OPENAI_API_KEY not configured")
+    completion_response = await openai_client.chat.completions.create(
         model=keyword_arguments['model'],
         messages=keyword_arguments['messages']
     )
@@ -1736,14 +1730,11 @@ async def generate_question_set(topic_name: str, difficulty_level: str):
 
 async def get_message_from_user(user: discord.User, payload):
     try:
-        print(type(user))
         dm_channel = await get_dm_channel_for_user(user)
         logging.info(f"Fetched or created DM channel with ID {dm_channel.id} for user ID {user.id}")
 
-
-        # Try to fetch the message
         message = await dm_channel.fetch_message(payload.message_id)
-        await asyncio.sleep(10)
+        await asyncio.sleep(1)
         logging.info(f"Message with ID {payload.message_id} successfully fetched from user's DM")
         return message
 
@@ -1815,22 +1806,23 @@ async def handle_difficulty_adjustment(user, payload, user_id):
     await wait_for_info_reaction(info_message, new_difficulty, icon, color, user_id)
 
 
-async def send_difficulty_message(user: discord.User, new_difficulty: str, user_id: int) -> Tuple[Union[discord.Message, None], str, str]:
+async def send_difficulty_message(user: discord.User, new_difficulty: str, user_id: int) -> Tuple[Union[discord.Message, None], str, discord.Color]:
     function_name = f"{__name__}.{inspect.currentframe().f_code.co_name}"
     logging.debug("Entering function: %s with new_difficulty=%s, user_id=%s", function_name, new_difficulty, user_id)
 
     try:
         color = get_color(new_difficulty)
         icon = get_icon(new_difficulty)
-
-    
-        
-
+        dm_channel = await get_dm_channel_for_user(user)
+        embed = discord.Embed(title=f"{icon} {new_difficulty.capitalize()} selected", color=color)
+        embed.description = "React with ℹ️ for details."
+        message = await dm_channel.send(embed=embed)
+        await message.add_reaction('ℹ️')
     except Exception as e:
         logging.error("An error occurred in %s: %s", function_name, e, exc_info=True)
-        return None, '', ''  # Return empty values on error
+        return None, '', discord.Color.default()
 
-    result = (icon, color)
+    result = (message, icon, color)
     logging.debug("Returning from %s: %s", function_name, result)
     return result
 
@@ -1886,7 +1878,7 @@ def build_detailed_embed(difficulty, icon, color, user_id):
     embed.add_field(name="Number of Questions", value=str(len(quiz_data[difficulty])), inline=True)
     embed.add_field(name="Average Question Time", value=f"{DIFFICULTY_TIMES[difficulty]} seconds", inline=True)
     embed.add_field(name="Total Quiz Takers", value=str(quiz_participation_counter.get(user_id, 0)), inline=True)
-    embed.add_field(name="Tip", value=DIFFICULTY_TIPS[difficulty], inline=False)
+    embed.add_field(name="Tip", value=DIFFICULTY_TIPS.get(difficulty, "Stay focused and manage your time wisely."), inline=False)
     embed.set_footer(text=f"User ID: {user_id}")
     return embed
 
@@ -1905,7 +1897,8 @@ def is_user_in_quiz(user_id):
 async def process_quiz_reaction(user: discord.User, payload, user_id):
     # Fetch the message object
     try:
-        message = await user.fetch_message(payload.message_id)
+        dm_channel = await get_dm_channel_for_user(user)
+        message = await dm_channel.fetch_message(payload.message_id)
         await asyncio.sleep(1)
     except discord.errors.NotFound:
         return
@@ -1954,6 +1947,3 @@ async def process_quiz_reaction(user: discord.User, payload, user_id):
     await quiz_state.update_time_taken(user_id)
     await quiz_state.proceed_to_next_question(user, user_id, q_index)
 
-
-
-bot.run(TOKEN)
