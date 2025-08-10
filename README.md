@@ -1,98 +1,79 @@
 # IT Support & Knowledge Quiz Bot 🤖
 
-🚀 A versatile Discord bot designed to help IT professionals and learners test their knowledge, receive helpful hints, and track their progress efficiently.
+A Discord bot for interactive IT quizzes, with timers, leaderboards, hints, and AI explanations.
 
----
+- **Language**: Python 3.11+
+- **Libraries**: `discord.py`, `pymongo`, `openai`
 
-## **Core Features**
-- 📚 **Interactive Quizzes**: Questions across IT domains with varying difficulty levels.
-- 🕒 **Timed Challenges**: Stay sharp with countdown timers.
-- 🏆 **Leaderboard**: Compete and see your ranking instantly.
-- 💡 **Hints & Explanations**: Learn from mistakes with clear feedback.
-- 🤓 **AI-Powered Insights**: Get assistance on quiz topics with integrated AI.
-- 💾 **MongoDB Integration**: Fetch and update questions seamlessly.
+## Badges
 
----
+- CI: GitHub Actions runs lint and tests on every PR.
 
-## **Tech Stack**
-- **Language**: Python
-- **Key Libraries**: `discord.py`, `asyncio`, `pymongo`
-- **Database**: MongoDB Atlas
-- **Deployment**: Cloud or local hosting options
+## Features
+- Interactive quiz flows in DMs
+- Timed questions per difficulty
+- Real-time leaderboard and metrics
+- Hints and AI-powered explanations (OpenAI)
+- Optional MongoDB topics source; works without DB
 
----
+## Scaling and performance
+- `MAX_CONCURRENT_AI` (default 3): limits concurrent OpenAI calls
+- `TIMER_UPDATE_INTERVAL` (default 2.0): reduce DM timer update frequency
+- `ANIMATIONS_ENABLED` (default true): toggle animations for low-noise runs
 
-## **Setup Instructions**
-1. **Clone the Repository**:
-    ```bash
-    git clone https://github.com/your-username/quiz-bot.git
-    cd quiz-bot
-    ```
+## Getting Started
 
-2. **Install Dependencies**:
-    ```bash
-    pip install -r requirements.txt
-    ```
+### 1) Clone
+```bash
+git clone https://github.com/your-username/quiz-bot.git
+cd quiz-bot
+```
 
-3. **Configure Environment Variables**:
-    - Create a `.env` file with the following:
-        ```plaintext
-        DISCORD_TOKEN=your_discord_bot_token
-        OPENAI_API_KEY=your_openai_api_key
-        MONGO_URI=your_mongodb_connection_uri
-        ```
+### 2) Configure
+Copy `.env.example` to `.env` and fill values:
+```
+DISCORD_TOKEN=your_discord_bot_token
+OPENAI_API_KEY=your_openai_api_key
+MONGO_URI=your_mongodb_connection_uri # optional
+# Scaling
+MAX_CONCURRENT_AI=3
+TIMER_UPDATE_INTERVAL=2
+ANIMATIONS_ENABLED=true
+```
 
-4. **Run the Bot**:
-    ```bash
-    python bot.py
-    ```
----
+### 3) Install
+```bash
+pip3 install -r requirements.txt
+```
 
-## **Quick Start Guide**
+### 4) Run
+```bash
+python3 bot.py
+```
 
-### 1. **Starting the Quiz**
-   ![Getting The Quiz Started](https://i.imgur.com/LOR6eKK.png)
+Or with Docker:
+```bash
+docker build -t quiz-bot:latest .
+docker run --rm \
+  -e DISCORD_TOKEN=$DISCORD_TOKEN \
+  -e OPENAI_API_KEY=$OPENAI_API_KEY \
+  -e MONGO_URI=$MONGO_URI \
+  -e MAX_CONCURRENT_AI=3 \
+  -e TIMER_UPDATE_INTERVAL=2 \
+  -e ANIMATIONS_ENABLED=true \
+  quiz-bot:latest
+```
 
-   Use the command `!q` to initiate a quiz.
+## Usage
+In a DM with your bot, send `!q` and follow on-screen reactions to choose difficulty and question source.
 
-### 2. **Choosing Difficulty**
-   ![Starting a Quiz](https://i.imgur.com/zq3PmV3.png)
+## Development
+- Lint and format: `make lint` / `make format`
+- Tests: `make test`
+- Common tasks: `make help` (see Makefile)
 
-   React with 💚, 💛, or 💜 to choose the quiz difficulty level.
+## Contributing
+See `CONTRIBUTING.md` and `CODE_OF_CONDUCT.md`.
 
-### 3. **Select Quiz Type**
-   ![Selecting Quiz Type](https://i.imgur.com/K7U1VCt.png)
-
-   Choose an option: 1️ Generate new questions, 2️ Pick existing topics, 3 cancel, or 4 Go back.
-
-### 4. **Generate Quizzes**
-   ![Generating New Quizzes](https://i.imgur.com/9h5vpTA.png)
-
-   Example: Enter your topic of choice to start generating questions using OPENAI's ChatGPT "4o" Model.
-
-### 5. **Question Embed**
-   ![Quiz Question Embed](https://i.imgur.com/N4lR9Yy.png)
-
-   View: Question & answer choices and emoji reactions as your way of answer input with color-coded difficulty timers.
-
----
-
-## **Contributing**
-We welcome contributions! Here’s how to get started:
-1. Fork the repository.
-2. Create a branch (`git checkout -b feature-name`).
-3. Commit your changes (`git commit -m 'Add feature'`).
-4. Push to your branch (`git push origin feature-name`).
-5. Submit a pull request.
-
----
-
-## **License**
-This project is licensed under the [MIT License](LICENSE).
-
----
-
-## **Contact**
-For questions or contributions:
-- **GitHub**: [Kyle A Dean](https://github.com/cloudURBANE)
-- **LinkedIn**: [My LinkedIn Profile](https://www.linkedin.com/in/kyleaustin-dean/)
+## License
+MIT — see `LICENSE`.
